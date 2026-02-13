@@ -1,102 +1,35 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
+import VMList from "./components/VMList";
+import "./index.css";
 
 function App() {
-  const [vms, setVms] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [lastUpdate, setLastUpdate] = useState(null)
-useEffect(() => {
-  const fetchData = () => {
-    fetch('http://localhost:3002/api/vms')
-      .then(res => res.json())
-      .then(data => setVms(data))
-      .catch(err => console.error(err))
-      console.log('restart')
-  }
+  const [vms, setVms] = useState([]);
 
-  fetchData()
+  const fetchData = async () => {
+    const res = await fetch("http://localhost:3002/api/vms");
+    const data = await res.json();
+    setVms(data);
+  };
 
-const interval = setInterval(fetchData, 10000)
-
-  return () => clearInterval(interval)
-}, [])
+  const handleAction = async (name, action) => {
+    await fetch(`http://localhost:3002/api/vms/${name}/${action}`, {
+      method: "POST",
+    });
+    fetchData();
+  };
 
   useEffect(() => {
-    fetch('http://localhost:3002/api/vms')
-      .then(res => res.json())
-      .then(data => {
-        setVms(data)
-        setLoading(false)
-        setLastUpdate(new Date())
-      })
-      .catch(err => {
-        console.error('Error:', err)
-        setLoading(false)
-      })
-  }, [])
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
-  if (loading) {
-    return <h2>Loading...</h2>
-  }
-const styles = {
-  container: {
-    padding: '40px',
-    fontFamily: 'Arial, sans-serif',
-    backgroundColor: '#222221',
-    minHeight: '100vh'
-  },
-  title: {
-    marginBottom: '30px'
-  },
-  card: {
-    backgroundColor: '#b9b9b9',
-    padding: '20px',
-    marginBottom: '15px',
-    borderRadius: '12px',
-    boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  vmName: {
-    margin: 0
-  },
-  status: {
-    color: '#ffffff',
-    padding: '6px 12px',
-    borderRadius: '20px',
-    fontWeight: 'bold'
-  }
-}
   return (
-  <div style={styles.container}>
-    <h1 style={styles.title}>VM Monitor</h1>
-    <p>Last update: {new Date().toLocaleTimeString()}</p>
-    {vms.map((vm, index) => (
-      <div
-        key={index}
-        style={{
-          ...styles.card,
-          borderLeft: vm.status === 'UP'
-            ? '30px solid #22c55e'
-            : '30px solid #ef4444'
-        }}
-      >
-        <h3 style={styles.vmName}>{vm.name}</h3>
-
-        <span
-          style={{
-            ...styles.status,
-            backgroundColor:
-              vm.status === 'UP' ? '#22c55e' : '#ef4444'
-          }}
-        >
-          {vm.status}
-        </span>
-      </div>
-    ))}
-  </div>
-)
-
+    <div className="container">
+      <h1>VM Monitor</h1>
+      <VMList vms={vms} onAction={handleAction} />
+    </div>
+  );
 }
 
-export default App
+export default App;

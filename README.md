@@ -42,12 +42,29 @@ Fetch VM health status from API
 Auto refresh every 5 seconds
 
 Visual status indicator (UP / DOWN)
+## ⚙️ VM Management
 
-📌 Future Improvements
-Add database
+- Start virtual machine
+- Shutdown virtual machine
+- Reboot virtual machine
+- Real-time status refresh (5s)
 
-Add VM control actions
+VM control is powered by:
 
-Add authentication
+virsh -c qemu:///system
 
-Deploy to production
+---
+
+## 🧠 Architecture
+
+React → Express → virsh → libvirt (qemu:///system) → KVM
+
+---
+
+## 📊 Next Steps
+
+- Extended VM statistics (CPU / RAM via virsh domstats)
+- Deployment with systemd
+- Docker containerization
+
+
